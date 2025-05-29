@@ -3,21 +3,23 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
+	"github.com/Calendar/hw12_13_14_15_calendar/internal/app"
+	"github.com/Calendar/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Calendar/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/Calendar/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/Calendar/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -29,12 +31,19 @@ func main() {
 	}
 
 	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
-
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
-
-	server := internalhttp.NewServer(logg, calendar)
+	fmt.Printf("Database config: %+v\n", config)
+	var storage app.Storage
+	switch config.Storage {
+	case "database":
+		storage = sqlstorage.New(config.Database)
+	case "in-memory":
+		storage = memorystorage.New()
+	default:
+		storage = memorystorage.New()
+	}
+	Logg := logger.New(config.Logger.Level)
+	calendar := app.New(Logg, storage)
+	server := internalhttp.NewServer(Logg, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -47,14 +56,14 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			Logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	Logg.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
+		Logg.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}

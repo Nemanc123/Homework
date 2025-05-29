@@ -1,0 +1,12 @@
+
+storage_impl: "in-memory"
+logger:
+  level: "INFO"
+database:
+  host: "localhost"
+  port: 5430
+  schema: "calendar"
+  database_db: "postgres_db"
+  user: "postgres_user"
+  password: "postgres_password"
+
