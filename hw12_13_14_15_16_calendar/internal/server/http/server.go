@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	genApi "github.com/Calendar/hw12_13_14_15_calendar/api/gen/go"
+	api "github.com/Calendar/hw12_13_14_15_calendar/internal/server/api"
+	"github.com/Calendar/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Server struct {
@@ -21,12 +25,21 @@ type Logger interface {
 }
 
 type Application interface {
+	CreateEvent(ctx context.Context, event storage.Event) error
+	DeleteEvent(ctx context.Context, id int) error
+	GetEvent(ctx context.Context) ([]storage.Event, error)
+	UpdateEvent(ctx context.Context, id int, event storage.Event) error
 }
 
 func NewServer(logger Logger, app Application) *Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", homeHandler)
+	//mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/hello", helloHandler)
+	EventAPIService := api.NewEventAPIService(app)
+	EventAPIController := genApi.NewEventAPIController(EventAPIService)
+
+	router := genApi.NewRouter(EventAPIController)
+	mux.Handle("/", router)
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      loggingMiddleware(mux, logger),
@@ -34,15 +47,17 @@ func NewServer(logger Logger, app Application) *Server {
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
+
 	return &Server{server: server, logger: logger, app: app}
 }
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
 
-}
+//	func homeHandler(w http.ResponseWriter, r *http.Request) {
+//		if r.URL.Path != "/" {
+//			http.NotFound(w, r)
+//			return
+//		}
+//
+// }
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello world"))
 }

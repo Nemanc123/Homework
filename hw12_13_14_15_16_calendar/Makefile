@@ -37,4 +37,10 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run ./...
 
-.PHONY: build run build-img run-img version test lint
+generate:
+	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate \
+          -i /local/api/Swagger.yaml \
+          -g go-server \
+          -o /local/api/gen1 \
+          --additional-properties=packageName=api
+.PHONY: build run build-img run-img version test lint generate

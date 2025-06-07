@@ -1,0 +1,179 @@
+openapi: 3.0.4
+info:
+  description: Swager calendar event
+  title: Swagger calendar - OpenAPI 3.0
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+- url: localhost:8080
+tags:
+- description: Everything about your events
+  externalDocs:
+    description: Find out more
+    url: https://github.com/Nemanc123
+  name: event
+paths:
+  /event/{eventId}:
+    delete:
+      description: Delete a event.
+      operationId: deleteevent
+      parameters:
+      - description: event id to delete
+        explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: event deleted
+        "400":
+          description: Invalid event value
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Deletes a event.
+      tags:
+      - event
+    put:
+      description: "You can change the id user, title, date and time of the event,\
+        \ duration of the event, description event."
+      operationId: updateevent
+      parameters:
+      - explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+        description: Update an event
+        required: true
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: event not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Update event.
+      tags:
+      - event
+  /events:
+    get:
+      description: Outputs all the events that are currently available.
+      operationId: getAllEvents
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/event'
+                type: array
+          description: successful operation
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Read all events.
+      tags:
+      - event
+    post:
+      description: Add a new event event.
+      operationId: addevent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+        description: Create a new event event
+        required: true
+      responses:
+        "200":
+          description: Event add
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Add event event.
+      tags:
+      - event
+components:
+  requestBodies:
+    event:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/event'
+      description: event object that needs to be added to the store
+  schemas:
+    event:
+      example:
+        timeUntilEvent: 50
+        dataEnd: 2000-01-23T04:56:07.000+00:00
+        dataStart: 2000-01-23T04:56:07.000+00:00
+        description: approved
+        id: "10"
+        title: "7"
+        userId: 198772
+      properties:
+        id:
+          example: "10"
+          type: string
+        userId:
+          example: 198772
+          format: int64
+          type: integer
+        title:
+          example: "7"
+          type: string
+        dataStart:
+          format: date-time
+          type: string
+        dataEnd:
+          format: date-time
+          type: string
+        description:
+          example: approved
+          type: string
+        timeUntilEvent:
+          example: 50
+          format: int64
+          type: integer
+      type: object
+    Error:
+      example:
+        code: code
+        message: message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object

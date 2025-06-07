@@ -1,0 +1,164 @@
+openapi: 3.0.4
+info:
+  title: Swagger calendar - OpenAPI 3.0
+  description: |-
+    Swager calendar event
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+  - url: localhost:8080
+tags:
+  - name: event
+    description: Everything about your events
+    externalDocs:
+      description: Find out more
+      url: https://github.com/Nemanc123
+paths:
+  /event/{eventId}:
+    put:
+      tags:
+        - event
+      summary: Update event.
+      description: You can change the id user, title, date and time of the event, duration of the event, description event.
+      operationId: updateevent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update an event
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+        required: true
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: event not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - event
+      summary: Deletes a event.
+      description: Delete a event.
+      operationId: deleteevent
+      parameters:
+        - name: eventId
+          in: path
+          description: event id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: event deleted
+        '400':
+          description: Invalid event value
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events:
+    get:
+      tags:
+        - event
+      summary: Read all events.
+      description: Outputs all the events that are currently available.
+      operationId: getAllEvents
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/event'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - event
+      summary: Add event event.
+      description: Add a new event event.
+      operationId: addevent
+      requestBody:
+        description: Create a new event event
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+        required: true
+      responses:
+        '200':
+          description: Event add
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    event:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 10
+        userId:
+          type: integer
+          format: int64
+          example: 198772
+        title:
+          type: string
+          example: 7
+        dataStart:
+          type: string
+          format: date-time
+        dataEnd:
+          type: string
+          format: date-time
+        description:
+          type: string
+          example: approved
+        timeUntilEvent:
+          type: integer
+          format: int64
+          example: 50
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  requestBodies:
+    event:
+      description: event object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/event'
