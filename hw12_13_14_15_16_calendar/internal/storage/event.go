@@ -17,16 +17,16 @@ type Event struct {
 
 func (e *Event) Validate() error {
 	if e.Title == "" {
-		return errors.New("Заголовок пустой ")
+		return errors.New("the title is empty")
 	}
 	if e.DataEnd.IsZero() {
-		return errors.New("Время окончание события не указан ")
+		return errors.New("the end time of the event is not specified")
 	}
 	if e.IdUser == 0 {
-		return errors.New("Не указан id пользователя ")
+		return errors.New("user id is not specified")
 	}
 	if !e.DataEnd.After(e.DataStart) {
-		return errors.New("Не правильно указано время ")
+		return errors.New("the time is not specified correctly")
 	}
 	return nil
 }
