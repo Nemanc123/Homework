@@ -18,11 +18,11 @@ build-img:
 		-f build/Dockerfile .
 
 run-img: build-img
-	@echo "Остановка и удаление старого контейнера (если существует)..."
+	@echo "Stopping and deleting the old container (if it exists)..."
 	-docker stop $(APP_NAME) 2>/dev/null || true
 	-docker rm $(APP_NAME) 2>/dev/null || true
 
-	@echo "Запуск нового контейнера..."
+	@echo "Launching a new container..."
 	docker run -d --name $(APP_NAME) -p 8080:8080 $(DOCKER_IMG)
 
 version: build
@@ -41,6 +41,6 @@ generate:
 	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate \
           -i /local/api/Swagger.yaml \
           -g go-server \
-          -o /local/api/gen1 \
-          --additional-properties=packageName=api
+          -o /local/api/gen \
+          --additional-properties=packageName=api,outputAsLibrary=true
 .PHONY: build run build-img run-img version test lint generate

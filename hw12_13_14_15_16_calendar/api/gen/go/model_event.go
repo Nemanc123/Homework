@@ -19,7 +19,7 @@ import (
 
 type Event struct {
 
-	Id string `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
 
 	UserId int64 `json:"userId,omitempty"`
 

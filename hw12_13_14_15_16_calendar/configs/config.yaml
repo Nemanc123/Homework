@@ -1,9 +1,8 @@
-
-storage_impl: "in-memory"
+storage_impl: "database"
 logger:
   level: "INFO"
 database:
-  host: "localhost"
+  host: "172.20.10.4"
   port: 5430
   schema: "calendar"
   database_db: "postgres_db"

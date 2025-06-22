@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Calendar/hw12_13_14_15_calendar/internal/storage"
 	_ "github.com/jackc/pgx/stdlib"
+	"log"
 )
 
 type DatabaseConf struct {
@@ -23,17 +24,22 @@ type Storage struct {
 	ctx    context.Context
 }
 
-func New(d DatabaseConf) *Storage {
-	return &Storage{dbConf: d}
+func New(d DatabaseConf, ctx context.Context) *Storage {
+	strg := &Storage{dbConf: d, ctx: ctx}
+	err := strg.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return strg
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		"localhost",
-		"5432",
-		"postgres_user",
-		"postgres_password",
-		"postgres_db",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		s.dbConf.Host,
+		s.dbConf.Port,
+		s.dbConf.User,
+		s.dbConf.Password,
+		s.dbConf.Database,
 		"disable",
 	)
 	var err error
@@ -43,7 +49,8 @@ func (s *Storage) Connect(ctx context.Context) error {
 	}
 	er := s.db.PingContext(ctx)
 	if er != nil {
-		return fmt.Errorf("failed to connect to db: %w", err)
+		fmt.Println(er)
+		return fmt.Errorf("failed to connect to db: %w", er)
 	}
 	s.ctx = ctx
 	return nil
@@ -52,13 +59,13 @@ func (s *Storage) Connect(ctx context.Context) error {
 func (s *Storage) Close(ctx context.Context) error {
 	return nil
 }
-func (s *Storage) CreateEvent(event storage.Event) error {
+func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 	tx, err := s.db.BeginTx(s.ctx, nil) // *sql.Tx
 	if err != nil {
-		return fmt.Errorf("unable to begin transaction: %w", err)
+		log.Fatal(err)
 	}
 	defer tx.Rollback()
-	query := `insert into events(
+	query := `insert into calendar.events (
                    id, 
                    title,
                    date_and_time_of_the_event,

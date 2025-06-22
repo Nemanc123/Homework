@@ -33,9 +33,13 @@ func main() {
 	config := NewConfig()
 	fmt.Printf("Database config: %+v\n", config)
 	var storage app.Storage
+	ctx, cancel := signal.NotifyContext(context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	defer cancel()
 	switch config.Storage {
 	case "database":
-		storage = sqlstorage.New(config.Database)
+		storage = sqlstorage.New(config.Database, ctx)
+
 	case "in-memory":
 		storage = memorystorage.New()
 	default:
@@ -44,10 +48,6 @@ func main() {
 	Logg := logger.New(config.Logger.Level)
 	calendar := app.New(Logg, storage)
 	server := internalhttp.NewServer(Logg, calendar)
-
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-	defer cancel()
 
 	go func() {
 		<-ctx.Done()

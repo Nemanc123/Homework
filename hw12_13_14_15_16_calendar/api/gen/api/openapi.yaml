@@ -136,13 +136,14 @@ components:
         dataEnd: 2000-01-23T04:56:07.000+00:00
         dataStart: 2000-01-23T04:56:07.000+00:00
         description: approved
-        id: "10"
+        id: 10
         title: "7"
         userId: 198772
       properties:
         id:
-          example: "10"
-          type: string
+          example: 10
+          format: int64
+          type: integer
         userId:
           example: 198772
           format: int64

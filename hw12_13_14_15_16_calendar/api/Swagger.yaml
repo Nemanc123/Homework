@@ -123,7 +123,8 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           example: 10
         userId:
           type: integer

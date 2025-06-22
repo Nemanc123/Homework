@@ -52,7 +52,7 @@ func (s *EventAPIService) Addevent(ctx context.Context, event api.Event) (api.Im
 }
 func (s *EventAPIService) StorageEventsToAPIEvents(event storage.Event) api.Event {
 	resultEventAPIStorage := api.Event{}
-	resultEventAPIStorage.Id = event.ID
+	resultEventAPIStorage.Id = int64(event.ID)
 	resultEventAPIStorage.Title = event.Title
 	resultEventAPIStorage.DataStart = event.DataStart
 	resultEventAPIStorage.DataEnd = event.DataEnd
@@ -64,7 +64,7 @@ func (s *EventAPIService) StorageEventsToAPIEvents(event storage.Event) api.Even
 
 func (s *EventAPIService) APIEventsToStorageEvents(event api.Event) storage.Event {
 	resultEventStorage := storage.Event{}
-	resultEventStorage.ID = event.Id
+	resultEventStorage.ID = int(event.Id)
 	resultEventStorage.Title = event.Title
 	resultEventStorage.DataStart = event.DataStart
 	resultEventStorage.DataEnd = event.DataEnd

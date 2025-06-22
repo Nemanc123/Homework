@@ -15,7 +15,7 @@ type Logger interface {
 }
 
 type Storage interface {
-	CreateEvent(event storage.Event) error
+	CreateEvent(ctx context.Context, event storage.Event) error
 	DeleteEvent(id int) error
 	GetEvents() ([]storage.Event, error)
 	UpdateEvent(id int, event storage.Event) error
@@ -26,7 +26,7 @@ func New(logger Logger, storage Storage) *App {
 }
 
 func (a *App) CreateEvent(ctx context.Context, event storage.Event) error {
-	err := a.storage.CreateEvent(event)
+	err := a.storage.CreateEvent(ctx, event)
 	if err != nil {
 		return fmt.Errorf("couldn't create event: %w", err)
 	}
