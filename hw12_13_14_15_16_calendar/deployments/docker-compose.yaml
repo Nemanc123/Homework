@@ -1,6 +1,61 @@
 version: '3.9'
 
 services:
+  calendar:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - calendar-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - calendar-network
+
+  kafka:
+      image: confluentinc/cp-kafka:7.9.1-1-ubi8.amd64
+      depends_on:
+        - zookeeper
+      ports:
+        - "9092:9092"
+        - "29092:29092"
+      hostname: kafka
+      environment:
+        KAFKA_BROKER_ID: 1
+        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+        KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      networks:
+        - calendar-network
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    links:
+      - kafka
+      - zookeeper
+    networks:
+      - calendar-network
+
   postgres:
     image: postgres:latest
     container_name: postgres_container
@@ -10,9 +65,10 @@ services:
       POSTGRES_DB: postgres_db
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5430:5432"
+      - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data/pgdata
+      - ../migrations:/docker-entrypoint-initdb.d
     deploy:
       resources:
         limits:
@@ -37,7 +93,36 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-
+    networks:
+      - calendar-network
+  consumer:
+    build:
+      context: ..
+      dockerfile: build/DockerfileConsumer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: events
+      GROUP_ID: events
+    networks:
+      - calendar-network
+  producer:
+    build:
+      context: ..
+      dockerfile: build/DockerfileProducer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: events
+      GROUP_ID: events
+    networks:
+      - calendar-network
 volumes:
   pgdata:
     driver: local
+
+networks:
+  calendar-network:
+    driver: bridge

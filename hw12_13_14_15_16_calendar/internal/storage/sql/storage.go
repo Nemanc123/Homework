@@ -59,6 +59,7 @@ func (s *Storage) Connect(ctx context.Context) error {
 func (s *Storage) Close(ctx context.Context) error {
 	return nil
 }
+
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 	tx, err := s.db.BeginTx(s.ctx, nil) // *sql.Tx
 	if err != nil {

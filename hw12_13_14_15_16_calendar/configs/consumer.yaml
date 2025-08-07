@@ -1,6 +1,6 @@
-storage_impl: "database"
-logger:
-  level: "INFO"
+kafka:
+  broker: "kafka:9092"
+  topic: "events"
 database:
   host: "postgres"
   port: 5432
@@ -8,4 +8,3 @@ database:
   database_db: "postgres_db"
   user: "postgres_user"
   password: "postgres_password"
-

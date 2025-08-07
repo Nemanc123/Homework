@@ -1,0 +1,16 @@
+kafka:
+  broker: "kafka:9092"
+  topic: "events"
+producer:
+  interval: 1
+  maxRetries: 5
+  maxDelay: 32
+  checkInterval: 1
+  checkDelete: 24
+database:
+  host: "postgres"
+  port: 5432
+  schema: "calendar"
+  database_db: "postgres_db"
+  user: "postgres_user"
+  password: "postgres_password"
