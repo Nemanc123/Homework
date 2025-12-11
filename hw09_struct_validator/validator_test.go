@@ -17,6 +17,7 @@ type (
 		Email  string          `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
 		Role   UserRole        `validate:"in:admin,stuff"`
 		Phones []string        `validate:"len:11"`
+		Vers   App             `validate:"nested"`
 		meta   json.RawMessage //nolint:unused
 	}
 
@@ -42,17 +43,34 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in: User{
+				ID:     "111111111111111111111111111111111111",
+				Name:   "",
+				Age:    60,
+				Email:  "a@mail.ru",
+				Role:   "admin",
+				Phones: []string{"11122233355"},
+				meta:   nil,
+				Vers:   App{Version: "1.0.0"},
+			},
+			expectedErr: ValidationErrors{
+				{
+					Field: "Age",
+				},
+			},
 		},
-		// ...
-		// Place your code here.
 	}
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			tt := tt
 			t.Parallel()
-
+			err := Validate(tt.in)
+			for l := range tests[i].expectedErr.(ValidationErrors) {
+				if err.(ValidationErrors)[l].Field != tt.expectedErr.(ValidationErrors)[l].Field {
+					t.Errorf("test doesnt PASS")
+				}
+			}
 			// Place your code here.
 			_ = tt
 		})
