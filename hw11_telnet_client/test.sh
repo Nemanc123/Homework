@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+source ~/.bashrc
+shopt -s expand_aliases
 set -xeuo pipefail
 
 go build -o go-telnet
